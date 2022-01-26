@@ -55,28 +55,28 @@ fn main() {
     println!("done!");
 }
 
-fn self_similate<T: Metric>(me: Vec<T>) -> Vec<Vec<f64>> {
-    me.iter()
-        .map(|it| me.iter().map(|that| it.distance(that)).collect())
+fn self_similate<T: Metric>(list: &Vec<T>) -> Vec<f64> {
+    list.iter()
+        .flat_map(|it| list.iter().map(|that| it.distance(that)).collect::<Vec<_>>())
         .collect()
 }
 
 #[test]
 fn empty_me() {
-    let empty_result: Vec<Vec<f64>> = vec![];
-    assert_eq!(self_similate::<i16>(vec![]), empty_result);
+    let empty_result: Vec<f64> = vec![];
+    assert_eq!(self_similate::<i16>(&vec![]), empty_result);
 }
 
 #[test]
 fn one_by_one() {
-    assert_eq!(self_similate(vec![9]), vec![vec![0.0]]);
+    assert_eq!(self_similate(&vec![9]), vec![0.0]);
 }
 
 #[test]
 fn trivial_example() {
     assert_eq!(
-        self_similate(vec![8, 9]),
-        vec![vec![0.0, 1.0], vec![1.0, 0.0]]
+        self_similate(&vec![8, 9]),
+        vec![0.0, 1.0, 1.0, 0.0]
     );
 }
 
@@ -89,12 +89,12 @@ fn trivial_example() {
 #[test]
 fn not_so_trivial_example() {
     assert_eq!(
-        self_similate(vec![1, 2, 2, 3]),
+        self_similate(&vec![1, 2, 2, 3]),
         vec![
-            vec![0.0, 1.0, 1.0, 2.0],
-            vec![1.0, 0.0, 0.0, 1.0],
-            vec![1.0, 0.0, 0.0, 1.0],
-            vec![2.0, 1.0, 1.0, 0.0]
+            0.0, 1.0, 1.0, 2.0,
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            2.0, 1.0, 1.0, 0.0,
         ]
     );
 }
