@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 minimp3 = "0.5.1"
+png = "0.17.2"

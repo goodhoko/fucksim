@@ -35,24 +35,34 @@ fn main() {
             Err(e) => panic!("{:?}", e),
         }
     }
-    println!("frames: {}", frames.len());
-    let samples = frames
-        .iter()
-        .flat_map(|f| f.data.clone())
-        .collect::<Vec<_>>();
-    println!("samples: {}", samples.len());
-    
-    let frame = frames.get(1).unwrap();
-    println!("distance between the same frame: {}", frame.distance(frame));
-    let other_frame = frames.get(2).unwrap();
-    println!(
-        "distance between the different frames: {}",
-        frame.distance(other_frame)
-    );
-    
+    eprintln!("frames: {}", frames.len());
+
     // FIXME: this takes waaaaay to long to execute.
-    let matrix = self_similate(frames);
-    println!("done!");
+    let mut matrix = self_similate(&frames);
+    eprintln!("Matrix computed!");
+    normalize(&mut matrix);
+    eprintln!("Matrix normalized!");
+    print_matrix(frames.len(), &matrix);
+}
+
+fn normalize(matrix: &mut Vec<f64>) {
+    let max = matrix.iter().fold(0.0, |acc, el| {
+        if *el > acc { *el } else { acc }
+    });
+    eprintln!("max: {}", max);
+    matrix.iter_mut().for_each(|el| {
+        *el = *el / max;
+    })
+}
+
+fn print_matrix(size: usize, matrix: &Vec<f64>) {
+    let mut encoder = png::Encoder::new(io::stdout(), size as u32, size as u32);
+    encoder.set_color(png::ColorType::Grayscale);
+    encoder.set_depth(png::BitDepth::Eight);
+    let mut writer = encoder.write_header().unwrap();
+    let data  = matrix.iter().map(|el| (el * 255.0).floor() as u8 ).collect::<Vec<_>>();
+
+    writer.write_image_data(&data).unwrap(); // Save
 }
 
 fn self_similate<T: Metric>(list: &Vec<T>) -> Vec<f64> {
